@@ -29,17 +29,6 @@ Scored on 300 held-out claims (SciFact dev set; official test labels are hidden)
 | LLM + evidence | 0.737 | 0.684–0.785 | 74.0% | 66.3% | 28.0% | 1123 |
 | LLM closed-book | 0.434 | 0.384–0.485 | 48.3% | n/a | n/a | 1165 |
 
-![Macro-F1](results/macro_f1.png)
-
-**Key findings**
-
-- **Best system:** LLM + evidence, macro-F1 0.737 (95% CI 0.684–0.785).
-- **Fine-tuning on SciFact** moved the NLI verifier from 0.552 to 0.647 macro-F1 (seed 42; mean 0.666 ± 0.015 over 3 seeds).
-- **Retrieval for the LLM:** closed-book 0.434 vs. with evidence 0.737 macro-F1.
-- **Grounding:** ungrounded verdicts were 38.2% for the fine-tuned NLI model and 28.0% for the LLM with evidence.
-- **Most common failure** for LLM + evidence: verdict on nei claim (21 of 78 errors).
-- **Retrieval:** Dense (bge-small + FAISS) was chosen on validation (Recall@3 0.911). On test, at least one gold abstract is in the top 3 for 87.2% of claims with evidence; the table below reports Recall@k, the average fraction of a claim's gold abstracts retrieved.
-
 ## Failure analysis
 
 I read about 20 wrong predictions from the LLM + evidence system and about 16 from the fine-tuned NLI system. They fall into four patterns (counts are LLM / fine-tuned NLI, from `results/failures.csv`).
@@ -54,6 +43,17 @@ I read about 20 wrong predictions from the LLM + evidence system and about 16 fr
 **Takeaway:** Most errors are not retrieval errors. 60% of the LLM's mistakes and 66% of the fine-tuned NLI's happen at the verdict stage, and almost all of those are about deciding whether the evidence is *enough* (NEI vs. a verdict), not support vs. contradict. The fine-tuned NLI under-commits (31 missed verdicts), while both verifiers sometimes commit on claims the retrieved evidence does not settle. A few NEI cases (e.g. the statin claims) are arguably label ambiguity, so the NEI boundary is partly a limit of the dataset as well as of the models.
 
 Limitation: I read the first rows of each category, not a random sample, so the examples illustrate the patterns and the counts come from the full failure table.
+
+![Macro-F1](results/macro_f1.png)
+
+**Key findings**
+
+- **Best system:** LLM + evidence, macro-F1 0.737 (95% CI 0.684–0.785).
+- **Fine-tuning on SciFact** moved the NLI verifier from 0.552 to 0.647 macro-F1 (seed 42; mean 0.666 ± 0.015 over 3 seeds).
+- **Retrieval for the LLM:** closed-book 0.434 vs. with evidence 0.737 macro-F1.
+- **Grounding:** ungrounded verdicts were 38.2% for the fine-tuned NLI model and 28.0% for the LLM with evidence.
+- **Most common failure** for LLM + evidence: verdict on nei claim (21 of 78 errors).
+- **Retrieval:** Dense (bge-small + FAISS) was chosen on validation (Recall@3 0.911). On test, at least one gold abstract is in the top 3 for 87.2% of claims with evidence; the table below reports Recall@k, the average fraction of a claim's gold abstracts retrieved.
 
 ### Retrieval (validation and test)
 
