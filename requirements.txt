@@ -1,0 +1,12 @@
+rank_bm25
+faiss-cpu
+sentence-transformers
+transformers
+torch
+sentencepiece
+protobuf
+openai
+gradio
+scikit-learn
+pandas
+matplotlib
