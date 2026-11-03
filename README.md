@@ -2,6 +2,8 @@
 
 A retrieve-then-verify fact-checking pipeline benchmarked on [SciFact](https://github.com/allenai/scifact): 5,183 research abstracts and expert-written scientific claims labelled SUPPORT, CONTRADICT, or NOT ENOUGH INFO. It compares retrievers, then compares a zero-shot NLI model, a fine-tuned NLI model and an LLM on identical evidence, and measures how often each one gives a verdict it can't back up.
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/lavanyagni2402-cell/claim-verification-scifact/blob/main/claim_verification.ipynb)
+
 ```mermaid
 flowchart LR
     A[Claim] --> B[BM25]
