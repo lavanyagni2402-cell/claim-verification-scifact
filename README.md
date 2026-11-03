@@ -40,6 +40,21 @@ Scored on 300 held-out claims (SciFact dev set; official test labels are hidden)
 - **Most common failure** for LLM + evidence: verdict on nei claim (21 of 78 errors).
 - **Retrieval:** Dense (bge-small + FAISS) was chosen on validation (Recall@3 0.911). On test, at least one gold abstract is in the top 3 for 87.2% of claims with evidence; the table below reports Recall@k, the average fraction of a claim's gold abstracts retrieved.
 
+## Failure analysis
+
+I read about 20 wrong predictions from the LLM + evidence system and about 16 from the fine-tuned NLI system. They fall into four patterns (counts are LLM / fine-tuned NLI, from `results/failures.csv`).
+
+| Pattern | What happens | Count |
+|---|---|---|
+| Committing on an NEI claim | Evidence is on-topic but doesn't settle the claim; the model picks a side anyway | 21 / 30 |
+| Abstaining when inference is needed | Evidence is relevant but no single sentence states the claim (e.g. a specific mechanism), so the model says NEI | 14 / 31 |
+| Reading direction wrong | Support and contradict are swapped on claims with negation, numbers or comparisons | 12 / 7 |
+| Wrong evidence reached the verifier | The right paper or sentence was not retrieved, so NEI is a sensible answer | 31 / 35 |
+
+**Takeaway:** Most errors are not retrieval errors. 60% of the LLM's mistakes and 66% of the fine-tuned NLI's happen at the verdict stage, and almost all of those are about deciding whether the evidence is *enough* (NEI vs. a verdict), not support vs. contradict. The fine-tuned NLI under-commits (31 missed verdicts), while both verifiers sometimes commit on claims the retrieved evidence does not settle. A few NEI cases (e.g. the statin claims) are arguably label ambiguity, so the NEI boundary is partly a limit of the dataset as well as of the models.
+
+Limitation: I read the first rows of each category, not a random sample, so the examples illustrate the patterns and the counts come from the full failure table.
+
 ### Retrieval (validation and test)
 
 | Split | Retriever | Recall@1 | Recall@3 | Recall@5 | Recall@10 |
@@ -82,21 +97,6 @@ retriever rather than re-selecting on test.
 ## Run it
 
 Open `claim_verification.ipynb` in Google Colab with a T4 GPU, add `LLM_API_KEY` to Colab Secrets, and Run all. The last section launches a Gradio demo where you can type any claim.
-
-## Failure analysis
-
-I read about 20 wrong predictions from the LLM + evidence system and about 16 from the fine-tuned NLI system. They fall into four patterns (counts are LLM / fine-tuned NLI, from `results/failures.csv`).
-
-| Pattern | What happens | Count |
-|---|---|---|
-| Committing on an NEI claim | Evidence is on-topic but doesn't settle the claim; the model picks a side anyway | 21 / 30 |
-| Abstaining when inference is needed | Evidence is relevant but no single sentence states the claim (e.g. a specific mechanism), so the model says NEI | 14 / 31 |
-| Reading direction wrong | Support and contradict are swapped on claims with negation, numbers or comparisons | 12 / 7 |
-| Wrong evidence reached the verifier | The right paper or sentence was not retrieved, so NEI is a sensible answer | 31 / 35 |
-
-**Takeaway:** Most errors are not retrieval errors. 60% of the LLM's mistakes and 66% of the fine-tuned NLI's happen at the verdict stage, and almost all of those are about deciding whether the evidence is *enough* (NEI vs. a verdict), not support vs. contradict. The fine-tuned NLI under-commits (31 missed verdicts), while both verifiers sometimes commit on claims the retrieved evidence does not settle. A few NEI cases (e.g. the statin claims) are arguably label ambiguity, so the NEI boundary is partly a limit of the dataset as well as of the models.
-
-Limitation: I read the first rows of each category, not a random sample, so the examples illustrate the patterns and the counts come from the full failure table.
 
 ## Limitations
 
